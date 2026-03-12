@@ -426,6 +426,10 @@ function Landing({ onStart }) {
           Build My Schedule →
         </button>
         <div style={{ marginTop: 14, fontSize: 11, color: T.muted }}>AI-powered · 2 min · share as Instagram Story per day</div>
+        <a href="https://instagram.com/playsocialclub" target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: 5, marginTop: 10, fontSize: 12, fontWeight: 600, color: T.sageDark, textDecoration: "none" }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" /><circle cx="12" cy="12" r="5" /><circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none" /></svg>
+          @playsocialclub
+        </a>
       </div>
       <div className="f4" style={{ display: "flex", flexWrap: "wrap", gap: 6, justifyContent: "center", marginTop: 16, maxWidth: 480 }}>
         {CATS.slice(1).map(c => <span key={c.id} style={{ background: T.cream, border: `1px solid ${T.border}`, borderRadius: 100, fontSize: 11, fontWeight: 600, padding: "4px 12px", color: T.ink }}>{c.e} {c.label}</span>)}
