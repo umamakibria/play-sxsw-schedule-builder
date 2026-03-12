@@ -69,6 +69,7 @@ const EV_URL = {
 
 // Per-session URL overrides for sessions with unique signup links
 const SESSION_URL = {
+  3:  "https://luma.com/mbbx3bai",                               // Live Podcast: Future of Live Event Operations
   63: "https://www.createcultivate.com/futuresummit",          // C&C full day
   89: "https://partiful.com/e/creator-mixer-austin-2026",      // Creator Mixer
   47: "https://lu.ma/nonobvious-sxsw-2026",                    // Non-Obvious VIP lunch
