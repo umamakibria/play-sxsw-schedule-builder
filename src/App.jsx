@@ -1175,10 +1175,20 @@ function ExportView({ plan, onBack }) {
 
 // ─── ROOT ─────────────────────────────────────────────────────────────
 export default function App() {
-  const [page, setPage] = useState("landing");
-  const [prefs, setPrefs] = useState(null);
-  const [plan, setPlan] = useState({ Thursday: [], Friday: [], Saturday: [], Sunday: [], Monday: [] });
-  const [tip, setTip] = useState("");
+  const saved = useMemo(() => {
+    try { const s = localStorage.getItem("sxsw_state"); return s ? JSON.parse(s) : null; } catch { return null; }
+  }, []);
+
+  const initPage = saved?.page === "builder" || saved?.page === "export" ? saved.page : "landing";
+  const [page, setPage] = useState(initPage);
+  const [prefs, setPrefs] = useState(saved?.prefs || null);
+  const [plan, setPlan] = useState(saved?.plan || { Thursday: [], Friday: [], Saturday: [], Sunday: [], Monday: [] });
+  const [tip, setTip] = useState(saved?.tip || "");
+
+  function persist(updates) {
+    const state = { page: updates.page ?? page, prefs: updates.prefs ?? prefs, plan: updates.plan ?? plan, tip: updates.tip ?? tip };
+    try { localStorage.setItem("sxsw_state", JSON.stringify(state)); } catch {}
+  }
 
   function handleOnboardDone(p) { setPrefs(p); setPage("loading"); }
 
@@ -1188,6 +1198,7 @@ export default function App() {
     setPlan(clean);
     setTip(tipText);
     setPage("builder");
+    persist({ page: "builder", plan: clean, tip: tipText });
   }
 
   return (
@@ -1195,7 +1206,7 @@ export default function App() {
       {page === "landing" && <Landing onStart={() => setPage("onboarding")} />}
       {page === "onboarding" && <Onboarding onComplete={handleOnboardDone} />}
       {page === "loading" && <Loading prefs={prefs} onDone={handleGenDone} />}
-      {page === "builder" && <Builder plan={plan} setPlan={setPlan} tip={tip} onExport={() => setPage("export")} />}
+      {page === "builder" && <Builder plan={plan} setPlan={fn => { setPlan(prev => { const next = typeof fn === "function" ? fn(prev) : fn; persist({ plan: next }); return next; }); }} tip={tip} onExport={() => setPage("export")} />}
       {page === "export" && <ExportView plan={plan} onBack={() => setPage("builder")} />}
     </>
   );
