@@ -3,13 +3,13 @@ import { useState, useRef, useMemo, useEffect, useCallback } from "react";
 if (!document.getElementById("sxsw-gf")) {
   const l = Object.assign(document.createElement("link"), {
     id: "sxsw-gf", rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&family=DM+Sans:wght@300;400;500;600&display=swap"
+    href: "https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap"
   });
   document.head.appendChild(l);
 }
 
 const T = {
-  bg: "#BFD4AB", sage: "#B5C9A1", sageDark: "#8BA87A",
+  bg: "#FFF4B3", sage: "#FFE066", sageDark: "#C8A600",
   cream: "#F8F6F0", white: "#FFFFFF",
   pink: "#F2A8BC", pinkDark: "#E0809A", pinkSoft: "#FBE8EE",
   black: "#1A1A1A", ink: "#2C2C2C", muted: "#7A7A7A", border: "#E0DDD6",
@@ -704,9 +704,9 @@ const TOPICS = [
   { id: "creator-economy",  label: "Creator Economy",      e: "🎥",  color: "#C45A8A" },
   { id: "tech-ai",          label: "Tech & AI",            e: "🤖",  color: "#4A8FC4" },
   { id: "startups",         label: "Startups & Founders",  e: "🚀",  color: "#7C5EA8" },
-  { id: "culture-community",label: "Culture & Community",  e: "🌱",  color: "#5A9E7C" },
+  { id: "culture-community",label: "Culture & Community",  e: "🌱",  color: "#C8A600" },
   { id: "female-founders",  label: "Female Founders",      e: "♀️",  color: "#A8527C" },
-  { id: "health-wellness",  label: "Health & Wellness",    e: "🏃",  color: "#7AAF4E" },
+  { id: "health-wellness",  label: "Health & Wellness",    e: "🏃",  color: "#8BA800" },
   { id: "food-drinks",      label: "Food & Drinks",        e: "🍽",  color: "#C4A24A" },
   { id: "music",            label: "Music & Entertainment",e: "🎵",  color: "#C44A4A" },
   { id: "social-parties",   label: "Social & Parties",     e: "🎉",  color: "#E04A7A" },
@@ -742,6 +742,24 @@ const CATS = [
 
 const DAYS = ["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday"];
 const DD = { Saturday: "Mar 14", Sunday: "Mar 15", Monday: "Mar 16", Tuesday: "Mar 17", Wednesday: "Mar 18" };
+
+function gcalUrl(s) {
+  const dateMap = { Saturday: "20260314", Sunday: "20260315", Monday: "20260316", Tuesday: "20260317", Wednesday: "20260318" };
+  const d = dateMap[s.day] || "20260314";
+  function toGcalTime(timeStr) {
+    const m = timeStr.match(/(\d+):(\d+)\s*(AM|PM)/i);
+    if (!m) return "120000";
+    let h = +m[1], min = +m[2];
+    if (m[3].toUpperCase() === "PM" && h !== 12) h += 12;
+    if (m[3].toUpperCase() === "AM" && h === 12) h = 0;
+    return `${String(h).padStart(2,"0")}${String(min).padStart(2,"0")}00`;
+  }
+  const start = d + "T" + toGcalTime(s.t);
+  const end = s.e2 ? d + "T" + toGcalTime(s.e2) : d + "T" + toGcalTime(s.t);
+  const title = encodeURIComponent(s.title);
+  const loc = encodeURIComponent(s.v);
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&location=${loc}&ctz=America/Chicago`;
+}
 
 function tm(t) {
   if (!t) return 9999;
@@ -1446,7 +1464,7 @@ async function drawDayStory(dayName, entries) {
   const ctx = canvas.getContext("2d");
 
   // Background
-  ctx.fillStyle = "#BFD4AB";
+  ctx.fillStyle = "#FFF4B3";
   ctx.fillRect(0, 0, W, H);
   ctx.fillStyle = "rgba(0,0,0,0.05)";
   for (let x = 0; x < W; x += 38) for (let y = 0; y < H; y += 38) {
@@ -1460,11 +1478,11 @@ async function drawDayStory(dayName, entries) {
   ctx.beginPath(); ctx.roundRect(40, y, W - 80, 200, 18); ctx.fill();
   ctx.strokeStyle = "#1A1A1A"; ctx.lineWidth = 3;
   ctx.beginPath(); ctx.roundRect(40, y, W - 80, 200, 18); ctx.stroke();
-  ctx.fillStyle = "#8BA87A"; ctx.font = "500 26px 'DM Sans', sans-serif";
+  ctx.fillStyle = "#C8A600"; ctx.font = "500 26px 'DM Sans', sans-serif";
   ctx.fillText(`AUSTIN, TX  ·  ${DD[dayName]?.toUpperCase() || dayName.toUpperCase()}, 2026`, 68, y + 44);
-  ctx.fillStyle = "#1A1A1A"; ctx.font = "italic 900 80px 'Playfair Display', serif";
+  ctx.fillStyle = "#1A1A1A"; ctx.font = "italic 900 80px 'Instrument Serif', serif";
   ctx.fillText(`my ${dayName.toLowerCase()}`, 68, y + 116);
-  ctx.fillStyle = "#8BA87A"; ctx.font = "italic 900 80px 'Playfair Display', serif";
+  ctx.fillStyle = "#C8A600"; ctx.font = "italic 900 80px 'Instrument Serif', serif";
   ctx.fillText("schedule.", 68, y + 192);
   y += 224;
 
@@ -1477,7 +1495,7 @@ async function drawDayStory(dayName, entries) {
 
     const hasSp = s && s.sp.length > 0;
     const cardH = isSpecial ? 90 : (hasSp ? 140 : 110);
-    const [c, bg] = isRest ? ["#8BA87A", "#EDF5E8"] : isFoodBump ? ["#C4A24A", "#FBF6E8"] : s ? getVenueColor(s.ev) : ["#999", "#F5F5F0"];
+    const [c, bg] = isRest ? ["#C8A600", "#FFF9D6"] : isFoodBump ? ["#C4A24A", "#FBF6E8"] : s ? getVenueColor(s.ev) : ["#999", "#F5F5F0"];
 
     ctx.fillStyle = bg;
     ctx.beginPath(); ctx.roundRect(40, y, W - 80, cardH, 12); ctx.fill();
@@ -1486,9 +1504,9 @@ async function drawDayStory(dayName, entries) {
     ctx.fillStyle = bg; ctx.fillRect(40, y, 4, 8); ctx.fillRect(40, y + cardH - 8, 4, 8);
 
     if (isRest) {
-      ctx.fillStyle = "#8BA87A"; ctx.font = "bold 30px 'DM Sans', sans-serif";
+      ctx.fillStyle = "#C8A600"; ctx.font = "bold 30px 'DM Sans', sans-serif";
       ctx.fillText("🌿  Rest & Recharge Break", 68, y + 52);
-      ctx.fillStyle = "#8BA87A"; ctx.font = "22px 'DM Sans', sans-serif";
+      ctx.fillStyle = "#C8A600"; ctx.font = "22px 'DM Sans', sans-serif";
       ctx.fillText("Take a breath — you're doing great.", 68, y + 78);
     } else if (isFoodBump) {
       ctx.fillStyle = "#C4A24A"; ctx.font = "bold 30px 'DM Sans', sans-serif";
@@ -1498,7 +1516,7 @@ async function drawDayStory(dayName, entries) {
     } else if (s) {
       ctx.fillStyle = c; ctx.font = "600 22px 'DM Sans', sans-serif";
       ctx.fillText(`${s.ev.toUpperCase()}  ·  ${s.t}`, 66, y + 30);
-      ctx.fillStyle = "#2C2C2C"; ctx.font = "bold 29px 'Playfair Display', serif";
+      ctx.fillStyle = "#2C2C2C"; ctx.font = "bold 29px 'Instrument Serif', serif";
       const clean = s.title.replace(" ✦ Umama Speaking", "");
       const lines = wt(ctx, clean, 66, y + 62, W - 160, 36);
       if (hasSp) {
@@ -1517,9 +1535,9 @@ async function drawDayStory(dayName, entries) {
   ctx.fillStyle = "#1A1A1A";
   ctx.fillRect(0, H - 96, W, 96);
   ctx.fillStyle = "#F8F6F0"; ctx.textAlign = "center";
-  ctx.font = "italic bold 34px 'Playfair Display', serif";
+  ctx.font = "italic bold 34px 'Instrument Serif', serif";
   ctx.fillText("Built with PLAY Social Club 🌱", W / 2, H - 52);
-  ctx.fillStyle = "#8BA87A"; ctx.font = "24px 'DM Sans', sans-serif";
+  ctx.fillStyle = "#C8A600"; ctx.font = "24px 'DM Sans', sans-serif";
   ctx.fillText("@umamakibria  ·  playsocialclub.com", W / 2, H - 20);
   ctx.textAlign = "left";
 
@@ -1534,7 +1552,7 @@ function Pill({ label, active, onClick, color }) {
       color: active ? T.white : T.muted,
       border: `1.5px solid ${active ? (color || T.black) : T.border}`,
       borderRadius: 100, fontFamily: "'DM Sans',sans-serif",
-      fontSize: 12, fontWeight: 500, padding: "5px 14px",
+      fontSize: 12, fontWeight: 500, padding: "7px 14px", minHeight: 34,
       cursor: "pointer", whiteSpace: "nowrap", transition: "all 0.13s",
     }}>
       {label}
@@ -1557,23 +1575,23 @@ function Landing({ onStart }) {
     <div style={{ minHeight: "100vh", background: T.bg, backgroundImage: `radial-gradient(circle,#00000012 1px,transparent 1px)`, backgroundSize: "22px 22px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 24, fontFamily: "'DM Sans',sans-serif" }}>
       <style>{`@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}} @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}} .f1{animation:fadeUp 0.6s both} .f2{animation:fadeUp 0.6s 0.1s both} .f3{animation:fadeUp 0.6s 0.2s both} .f4{animation:fadeUp 0.6s 0.35s both} .cherry{animation:float 3s ease-in-out infinite} .sbtn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.2)!important} .sbtn:active{transform:translateY(0)}`}</style>
       <div className="cherry" style={{ fontSize: 52, marginBottom: 12, userSelect: "none" }}>🍒</div>
-      <div className="f1" style={{ background: T.cream, border: `2px solid ${T.black}`, borderRadius: 20, padding: "36px 32px 30px", maxWidth: 460, width: "100%", textAlign: "center", boxShadow: "6px 6px 0 rgba(0,0,0,0.1)" }}>
+      <div className="f1" style={{ background: T.cream, border: `2px solid ${T.black}`, borderRadius: 20, padding: "clamp(20px, 5vw, 36px) clamp(16px, 4vw, 32px) clamp(18px, 4vw, 30px)", maxWidth: 460, width: "100%", textAlign: "center", boxShadow: "6px 6px 0 rgba(0,0,0,0.1)" }}>
         <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: T.sageDark, marginBottom: 8 }}>Austin, TX · March 14–18, 2026</div>
-        <h1 className="f2" style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(24px,5vw,38px)", fontWeight: 900, fontStyle: "italic", color: T.black, margin: "0 0 12px", lineHeight: 1.1, letterSpacing: "-0.02em" }}>
+        <h1 className="f2" style={{ fontFamily: "'Instrument Serif',serif", fontSize: "clamp(24px,5vw,38px)", fontWeight: 900, fontStyle: "italic", color: T.black, margin: "0 0 12px", lineHeight: 1.1, letterSpacing: "-0.02em" }}>
           Let's build your ultimate<br /><span style={{ color: T.sageDark }}>SXSW schedule!</span>
         </h1>
         <p className="f3" style={{ fontSize: 14, color: T.muted, lineHeight: 1.6, margin: "0 0 22px" }}>
           These are <strong style={{ color: T.ink }}>free external events</strong> around the main conference — most are free & badge-free. Tell us your goals and we'll build a personalized itinerary.
         </p>
-        <div className="f3" style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 24, flexWrap: "wrap" }}>
+        <div className="f3" style={{ display: "flex", gap: "clamp(4px, 1.5vw, 8px)", justifyContent: "center", marginBottom: 24, flexWrap: "wrap" }}>
           {[["650+", "sessions"], ["290+", "venues"], ["5", "days"], ["Mostly", "FREE"]].map(([n, l]) => (
-            <div key={l} style={{ background: T.white, border: `1.5px solid ${T.border}`, borderRadius: 10, padding: "7px 13px" }}>
-              <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 18, fontWeight: 900, color: T.black, lineHeight: 1 }}>{n}</div>
-              <div style={{ fontSize: 9, color: T.muted, textTransform: "uppercase", letterSpacing: "0.06em", marginTop: 2 }}>{l}</div>
+            <div key={l} style={{ background: T.white, border: `1.5px solid ${T.border}`, borderRadius: 10, padding: "clamp(5px, 1.5vw, 7px) clamp(8px, 2vw, 13px)", minWidth: 0 }}>
+              <div style={{ fontFamily: "'Instrument Serif',serif", fontSize: "clamp(14px, 4vw, 18px)", fontWeight: 900, color: T.black, lineHeight: 1 }}>{n}</div>
+              <div style={{ fontSize: "clamp(8px, 2vw, 9px)", color: T.muted, textTransform: "uppercase", letterSpacing: "0.06em", marginTop: 2 }}>{l}</div>
             </div>
           ))}
         </div>
-        <button className="sbtn f4" onClick={onStart} style={{ background: T.black, color: T.cream, border: "none", borderRadius: 100, fontFamily: "'DM Sans',sans-serif", fontSize: 15, fontWeight: 600, padding: "14px 40px", cursor: "pointer", width: "100%", transition: "all 0.2s", boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}>
+        <button className="sbtn f4" onClick={onStart} style={{ background: T.black, color: T.cream, border: "none", borderRadius: 100, fontFamily: "'DM Sans',sans-serif", fontSize: "clamp(14px, 3.5vw, 15px)", fontWeight: 600, padding: "14px 40px", cursor: "pointer", width: "100%", minHeight: 48, transition: "all 0.2s", boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}>
           Build My Schedule →
         </button>
         <div style={{ marginTop: 14, fontSize: 11, color: T.muted }}>AI-powered · 2 min · share as Instagram Story per day</div>
@@ -1630,7 +1648,7 @@ function Onboarding({ onComplete }) {
       <div className="sld" key={step} style={{ background: T.cream, border: `2px solid ${T.black}`, borderRadius: 20, padding: "32px 28px", maxWidth: 500, width: "100%", boxShadow: "6px 6px 0 rgba(0,0,0,0.08)" }}>
         {step === 0 && <>
           <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: T.sageDark, marginBottom: 6 }}>Step 1 of 3</div>
-          <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: 24, fontWeight: 900, fontStyle: "italic", color: T.black, margin: "0 0 8px", lineHeight: 1.2 }}>What's your intention<br />for this week?</h2>
+          <h2 style={{ fontFamily: "'Instrument Serif',serif", fontSize: 24, fontWeight: 900, fontStyle: "italic", color: T.black, margin: "0 0 8px", lineHeight: 1.2 }}>What's your intention<br />for this week?</h2>
           <p style={{ fontSize: 13, color: T.muted, marginBottom: 16, lineHeight: 1.5 }}>What does a successful SXSW look like for you? The more specific, the better.</p>
           <textarea value={intention} onChange={e => setIntention(e.target.value)} placeholder="e.g. I want to connect with IRL creators, find brand partnerships for PLAY Social Club, and leave inspired with 3 new collaborators…" rows={4} style={{ width: "100%", boxSizing: "border-box", background: T.white, border: `1.5px solid ${T.border}`, borderRadius: 12, fontFamily: "'DM Sans',sans-serif", fontSize: 13, color: T.ink, padding: "12px 14px", resize: "none", lineHeight: 1.6, transition: "border 0.15s" }} />
           <div style={{ textAlign: "right", fontSize: 11, color: T.muted, marginTop: 4 }}>{intention.length} chars</div>
@@ -1638,24 +1656,24 @@ function Onboarding({ onComplete }) {
 
         {step === 1 && <>
           <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: T.sageDark, marginBottom: 6 }}>Step 2 of 3</div>
-          <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: 24, fontWeight: 900, fontStyle: "italic", color: T.black, margin: "0 0 8px", lineHeight: 1.2 }}>What are your goals?</h2>
+          <h2 style={{ fontFamily: "'Instrument Serif',serif", fontSize: 24, fontWeight: 900, fontStyle: "italic", color: T.black, margin: "0 0 8px", lineHeight: 1.2 }}>What are your goals?</h2>
           <p style={{ fontSize: 13, color: T.muted, marginBottom: 14 }}>Select 2–5 goals for best results.</p>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 7, marginBottom: 16 }}>
             {GOALS.map(g => {
               const active = selGoals.includes(g.id);
-              return <button key={g.id} onClick={() => setSelGoals(prev => active ? prev.filter(x => x !== g.id) : [...prev, g.id])} style={{ background: active ? T.black : T.white, color: active ? T.white : T.ink, border: `1.5px solid ${active ? T.black : T.border}`, borderRadius: 100, fontFamily: "'DM Sans',sans-serif", fontSize: 12, fontWeight: 500, padding: "6px 14px", cursor: "pointer", transition: "all 0.13s" }}>{g.e} {g.label}</button>;
+              return <button key={g.id} onClick={() => setSelGoals(prev => active ? prev.filter(x => x !== g.id) : [...prev, g.id])} style={{ background: active ? T.black : T.white, color: active ? T.white : T.ink, border: `1.5px solid ${active ? T.black : T.border}`, borderRadius: 100, fontFamily: "'DM Sans',sans-serif", fontSize: "clamp(11px, 3vw, 12px)", fontWeight: 500, padding: "8px 14px", minHeight: 44, cursor: "pointer", transition: "all 0.13s" }}>{g.e} {g.label}</button>;
             })}
           </div>
-          <div style={{ display: "flex", gap: 8 }}>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             {[{ key: "food", label: "🍽 Include free food stops", val: incFood, set: setIncFood }, { key: "rest", label: "🌿 Schedule rest breaks", val: incRest, set: setIncRest }].map(({ key, label, val, set }) => (
-              <div key={key} onClick={() => set(v => !v)} style={{ flex: 1, background: val ? T.pinkSoft : T.white, border: `1.5px solid ${val ? T.pinkDark : T.border}`, borderRadius: 10, padding: "10px 12px", cursor: "pointer", fontSize: 12, fontWeight: 500, color: val ? T.pinkDark : T.muted, textAlign: "center", transition: "all 0.15s" }}>{label}</div>
+              <div key={key} onClick={() => set(v => !v)} style={{ flex: "1 1 auto", minWidth: 130, background: val ? T.pinkSoft : T.white, border: `1.5px solid ${val ? T.pinkDark : T.border}`, borderRadius: 10, padding: "12px 12px", minHeight: 44, cursor: "pointer", fontSize: 12, fontWeight: 500, color: val ? T.pinkDark : T.muted, textAlign: "center", transition: "all 0.15s", display: "flex", alignItems: "center", justifyContent: "center" }}>{label}</div>
             ))}
           </div>
         </>}
 
         {step === 2 && <>
           <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: T.sageDark, marginBottom: 6 }}>Step 3 of 3</div>
-          <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: 24, fontWeight: 900, fontStyle: "italic", color: T.black, margin: "0 0 8px", lineHeight: 1.2 }}>Speakers or people<br />you want to meet?</h2>
+          <h2 style={{ fontFamily: "'Instrument Serif',serif", fontSize: 24, fontWeight: 900, fontStyle: "italic", color: T.black, margin: "0 0 8px", lineHeight: 1.2 }}>Speakers or people<br />you want to meet?</h2>
           <p style={{ fontSize: 13, color: T.muted, marginBottom: 14 }}>Type a name and press Enter. Or skip — the AI will use your goals.</p>
           <div style={{ background: T.white, border: `1.5px solid ${T.border}`, borderRadius: 12, padding: "10px 12px", minHeight: 70, cursor: "text" }}>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: tags.length ? 6 : 0 }}>
@@ -1664,15 +1682,15 @@ function Onboarding({ onComplete }) {
             <input value={people} onChange={e => setPeople(e.target.value)} onKeyDown={addTag} placeholder={tags.length ? "Add more…" : "e.g. Mark Cuban, Emma Grede, Hayley Williams…"} style={{ border: "none", background: "transparent", fontFamily: "'DM Sans',sans-serif", fontSize: 13, color: T.ink, width: "100%", padding: 0 }} />
           </div>
           <div style={{ fontSize: 11, color: T.muted, marginTop: 4 }}>Press Enter after each name</div>
-          <div style={{ background: "#F0F8EB", border: "1.5px solid #C8DFB8", borderRadius: 10, padding: "10px 14px", marginTop: 14 }}>
+          <div style={{ background: "#FFF9D6", border: "1.5px solid #E6D06B", borderRadius: 10, padding: "10px 14px", marginTop: 14 }}>
             <div style={{ fontSize: 12, fontWeight: 600, color: T.sageDark, marginBottom: 3 }}>🌱 PLAY Social Club tip</div>
-            <div style={{ fontSize: 12, color: "#5A7A4A", lineHeight: 1.5 }}>SXSW is a marathon. We'll build in recovery time and free food stops so you actually enjoy the week — not just survive it.</div>
+            <div style={{ fontSize: 12, color: "#9A8200", lineHeight: 1.5 }}>SXSW is a marathon. We'll build in recovery time and free food stops so you actually enjoy the week — not just survive it.</div>
           </div>
         </>}
 
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 22 }}>
-          {step > 0 ? <button onClick={() => setStep(s => s - 1)} style={{ background: "transparent", border: "none", color: T.muted, fontSize: 13, cursor: "pointer", fontFamily: "'DM Sans',sans-serif" }}>← Back</button> : <span />}
-          <button onClick={next} disabled={!canNext} style={{ background: canNext ? T.black : "#ccc", color: T.cream, border: "none", borderRadius: 100, fontFamily: "'DM Sans',sans-serif", fontSize: 14, fontWeight: 600, padding: "11px 28px", cursor: canNext ? "pointer" : "not-allowed", transition: "all 0.15s" }}>
+          {step > 0 ? <button onClick={() => setStep(s => s - 1)} style={{ background: "transparent", border: "none", color: T.muted, fontSize: 13, cursor: "pointer", fontFamily: "'DM Sans',sans-serif", minHeight: 44, padding: "8px 12px" }}>← Back</button> : <span />}
+          <button onClick={next} disabled={!canNext} style={{ background: canNext ? T.black : "#ccc", color: T.cream, border: "none", borderRadius: 100, fontFamily: "'DM Sans',sans-serif", fontSize: 14, fontWeight: 600, padding: "12px 28px", minHeight: 44, cursor: canNext ? "pointer" : "not-allowed", transition: "all 0.15s" }}>
             {step < 2 ? "Continue →" : "Generate My Schedule ✦"}
           </button>
         </div>
@@ -1732,7 +1750,7 @@ Rules: 2-4 sessions per day max. Include at least 1 food/meal session per day if
       <style>{`@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}`}</style>
       <div style={{ background: T.cream, border: `2px solid ${T.black}`, borderRadius: 20, padding: "44px 36px", maxWidth: 400, width: "100%", textAlign: "center", boxShadow: "6px 6px 0 rgba(0,0,0,0.1)" }}>
         <div style={{ fontSize: 48, marginBottom: 18, animation: "pulse 1.5s ease-in-out infinite" }}>✦</div>
-        <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: 22, fontWeight: 900, fontStyle: "italic", color: T.black, margin: "0 0 8px" }}>Building your schedule…</h2>
+        <h2 style={{ fontFamily: "'Instrument Serif',serif", fontSize: 22, fontWeight: 900, fontStyle: "italic", color: T.black, margin: "0 0 8px" }}>Building your schedule…</h2>
         <p style={{ fontSize: 13, color: T.muted, marginBottom: 22, height: 20 }}>{LOADING_MSGS[msgIdx]}</p>
         <div style={{ background: T.border, borderRadius: 100, height: 8, overflow: "hidden", marginBottom: 20 }}>
           <div style={{ height: "100%", width: `${progress}%`, background: T.black, borderRadius: 100, transition: "width 0.6s ease" }} />
@@ -1757,7 +1775,7 @@ function EventCard({ s, inPlan, onAdd }) {
       background: isYou ? "#FDF5FF" : T.white,
       border: `1px solid ${isYou ? "#D8B4FE" : T.border}`,
       borderLeft: `3px solid ${isYou ? "#A855F7" : c}`,
-      borderRadius: 10, padding: "10px 12px", cursor: "pointer",
+      borderRadius: 10, padding: "10px 12px", cursor: "pointer", overflow: "hidden",
       boxShadow: exp ? "0 4px 16px rgba(0,0,0,0.08)" : "0 1px 3px rgba(0,0,0,0.04)",
       transition: "box-shadow 0.15s",
     }}>
@@ -1773,10 +1791,10 @@ function EventCard({ s, inPlan, onAdd }) {
           <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginBottom: 3, alignItems: "center" }}>
             <span style={{ background: bg, color: c, border: `1px solid ${c}33`, borderRadius: 4, fontSize: 8, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", padding: "1px 5px", whiteSpace: "nowrap" }}>{s.ev}</span>
             {isYou && <span style={{ background: "#FAF5FF", color: "#9333EA", fontSize: 8, fontWeight: 800, padding: "1px 5px", borderRadius: 4, border: "1px solid #D8B4FE" }}>✦ YOU</span>}
-            {s.free && <span style={{ background: "#EDF5E8", color: "#5AAF7A", fontSize: 8, fontWeight: 700, padding: "1px 5px", borderRadius: 4 }}>FREE</span>}
+            {s.free && <span style={{ background: "#FFF9D6", color: "#C8A600", fontSize: 8, fontWeight: 700, padding: "1px 5px", borderRadius: 4 }}>FREE</span>}
             {s.food && <span style={{ background: "#FBF6E8", color: "#C4A24A", fontSize: 8, fontWeight: 700, padding: "1px 5px", borderRadius: 4 }}>🍽</span>}
           </div>
-          <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 13, fontWeight: 700, color: T.ink, lineHeight: 1.3 }}>{s.title.replace(" ✦ Umama Speaking","")}</div>
+          <div style={{ fontFamily: "'Instrument Serif',serif", fontSize: 13, fontWeight: 700, color: T.ink, lineHeight: 1.3 }}>{s.title.replace(" ✦ Umama Speaking","")}</div>
           {s.sp.length > 0 && <div style={{ fontSize: 10, color: T.muted, marginTop: 2 }}>{s.sp.slice(0,2).map(x => x.split(" — ")[0]).join(", ")}{s.sp.length > 2 ? ` +${s.sp.length-2}` : ""}</div>}
           {exp && (
             <div style={{ marginTop: 8, paddingTop: 8, borderTop: `1px solid ${T.border}` }}>
@@ -1788,10 +1806,16 @@ function EventCard({ s, inPlan, onAdd }) {
               <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginBottom: 8 }}>
                 {topicList.map(tid => { const td = TOPICS.find(x => x.id === tid); return td ? <span key={tid} style={{ background: td.color + "18", color: td.color, border: `1px solid ${td.color}33`, borderRadius: 4, fontSize: 9, padding: "1px 6px", fontWeight: 600 }}>{td.e} {td.label}</span> : null; })}
               </div>
-              {url && <a href={url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}
-                style={{ display: "inline-flex", alignItems: "center", gap: 4, background: T.black, color: T.cream, borderRadius: 100, fontFamily: "'DM Sans',sans-serif", fontSize: 11, fontWeight: 700, padding: "6px 14px", textDecoration: "none" }}>
-                RSVP / Register ↗
-              </a>}
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                {url && <a href={url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}
+                  style={{ display: "inline-flex", alignItems: "center", gap: 4, background: T.black, color: T.cream, borderRadius: 100, fontFamily: "'DM Sans',sans-serif", fontSize: 11, fontWeight: 700, padding: "8px 14px", minHeight: 36, textDecoration: "none" }}>
+                  RSVP / Register ↗
+                </a>}
+                <a href={gcalUrl(s)} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}
+                  style={{ display: "inline-flex", alignItems: "center", gap: 4, background: T.cream, color: T.ink, border: `1.5px solid ${T.border}`, borderRadius: 100, fontFamily: "'DM Sans',sans-serif", fontSize: 11, fontWeight: 700, padding: "7px 13px", minHeight: 36, textDecoration: "none" }}>
+                  📅 Add to Calendar
+                </a>
+              </div>
             </div>
           )}
         </div>
@@ -1800,7 +1824,7 @@ function EventCard({ s, inPlan, onAdd }) {
           <button onClick={e => { e.stopPropagation(); if (!inPlan) onAdd(s.day, s.id); }} style={{
             background: inPlan ? T.sage : T.black, color: T.cream, border: "none",
             borderRadius: 6, fontFamily: "'DM Sans',sans-serif", fontSize: 11, fontWeight: 700,
-            padding: "5px 10px", cursor: inPlan ? "default" : "pointer", whiteSpace: "nowrap",
+            padding: "8px 10px", minHeight: 36, cursor: inPlan ? "default" : "pointer", whiteSpace: "nowrap",
             opacity: inPlan ? 0.7 : 1, transition: "all 0.12s",
           }}>{inPlan ? "✓" : "+ Add"}</button>
           {url && !exp && <a href={url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}
@@ -1831,7 +1855,7 @@ function MiniSchedule({ plan, activeDay, setActiveDay, onDelete, onAdd }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       {/* Day tabs */}
-      <div style={{ display: "flex", gap: 3, overflowX: "auto", padding: "8px 12px 0", flexShrink: 0 }}>
+      <div style={{ display: "flex", gap: 3, overflowX: "auto", padding: "8px 12px 0", flexShrink: 0, WebkitOverflowScrolling: "touch", scrollbarWidth: "none", msOverflowStyle: "none" }}>
         {DAYS.map(d => {
           const cnt = (plan[d] || []).length;
           const isA = activeDay === d;
@@ -1841,7 +1865,7 @@ function MiniSchedule({ plan, activeDay, setActiveDay, onDelete, onAdd }) {
               color: isA ? T.cream : T.muted,
               border: `1px solid ${isA ? T.black : T.border}`,
               borderRadius: 6, fontFamily: "'DM Sans',sans-serif", fontSize: 10,
-              fontWeight: 600, padding: "3px 8px", cursor: "pointer", whiteSpace: "nowrap",
+              fontWeight: 600, padding: "6px 10px", minHeight: 34, cursor: "pointer", whiteSpace: "nowrap",
               transition: "all 0.1s", flexShrink: 0,
             }}>
               {d.slice(0,3)}
@@ -1853,7 +1877,7 @@ function MiniSchedule({ plan, activeDay, setActiveDay, onDelete, onAdd }) {
 
       {/* Day label */}
       <div style={{ padding: "6px 12px 4px", flexShrink: 0, borderBottom: `1px solid ${T.border}` }}>
-        <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 12, fontStyle: "italic", color: T.ink }}>{activeDay} <span style={{ color: T.muted, fontFamily: "'DM Sans',sans-serif", fontStyle: "normal", fontSize: 10 }}>{DD[activeDay]}</span></div>
+        <div style={{ fontFamily: "'Instrument Serif',serif", fontSize: 12, fontStyle: "italic", color: T.ink }}>{activeDay} <span style={{ color: T.muted, fontFamily: "'DM Sans',sans-serif", fontStyle: "normal", fontSize: 10 }}>{DD[activeDay]}</span></div>
         <div style={{ fontSize: 9, color: T.muted }}>drag to reorder · {planIds.length} total</div>
       </div>
 
@@ -1870,7 +1894,7 @@ function MiniSchedule({ plan, activeDay, setActiveDay, onDelete, onAdd }) {
           const isFoodBump = isSpecial && e.startsWith("food");
           const s = isSpecial ? null : DB.find(x => x.id === e);
           if (!isSpecial && !s) return null;
-          const [c] = isRest ? ["#8BA87A"] : isFoodBump ? ["#C4A24A"] : s ? getVenueColor(s.ev) : [T.muted];
+          const [c] = isRest ? ["#C8A600"] : isFoodBump ? ["#C4A24A"] : s ? getVenueColor(s.ev) : [T.muted];
           const isYou = s?.title?.includes("Umama");
           const isDrg = dragIdx === i;
           const isDrop = dragOver === i && dragIdx !== i;
@@ -1890,7 +1914,7 @@ function MiniSchedule({ plan, activeDay, setActiveDay, onDelete, onAdd }) {
               }}>
               <div style={{ color: "#ddd", fontSize: 10, flexShrink: 0 }}>⠿</div>
               <div style={{ flex: 1, minWidth: 0 }}>
-                {isRest && <div style={{ fontSize: 10, fontWeight: 600, color: "#8BA87A" }}>🌿 Rest break</div>}
+                {isRest && <div style={{ fontSize: 10, fontWeight: 600, color: "#C8A600" }}>🌿 Rest break</div>}
                 {isFoodBump && <div style={{ fontSize: 10, fontWeight: 600, color: "#C4A24A" }}>🍽 Food stop</div>}
                 {s && <>
                   <div style={{ fontSize: 9, color: c, fontWeight: 700, textTransform: "uppercase" }}>{s.t}</div>
@@ -1901,7 +1925,7 @@ function MiniSchedule({ plan, activeDay, setActiveDay, onDelete, onAdd }) {
                   )}
                 </>}
               </div>
-              <button onClick={() => onDelete(i)} style={{ background: "none", border: "none", color: "#ccc", fontSize: 13, cursor: "pointer", padding: "0 1px", flexShrink: 0, lineHeight: 1 }}>×</button>
+              <button onClick={() => onDelete(i)} style={{ background: "none", border: "none", color: "#ccc", fontSize: 16, cursor: "pointer", padding: "4px 6px", minWidth: 32, minHeight: 32, flexShrink: 0, lineHeight: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>×</button>
             </div>
           );
         })}
@@ -1915,8 +1939,8 @@ function MiniSchedule({ plan, activeDay, setActiveDay, onDelete, onAdd }) {
 
       {/* Footer quick-add */}
       <div style={{ padding: "6px 10px", borderTop: `1px solid ${T.border}`, display: "flex", gap: 4, flexShrink: 0 }}>
-        <button onClick={() => onAdd(activeDay, "rest")} style={{ flex: 1, background: "#EDF5E8", color: T.sageDark, border: `1px solid ${T.sageDark}33`, borderRadius: 6, fontFamily: "'DM Sans',sans-serif", fontSize: 10, fontWeight: 600, padding: "5px 0", cursor: "pointer" }}>🌿 Rest</button>
-        <button onClick={() => onAdd(activeDay, "food")} style={{ flex: 1, background: "#FBF6E8", color: "#C4A24A", border: "1px solid #C4A24A33", borderRadius: 6, fontFamily: "'DM Sans',sans-serif", fontSize: 10, fontWeight: 600, padding: "5px 0", cursor: "pointer" }}>🍽 Food</button>
+        <button onClick={() => onAdd(activeDay, "rest")} style={{ flex: 1, background: "#FFF9D6", color: T.sageDark, border: `1px solid ${T.sageDark}33`, borderRadius: 6, fontFamily: "'DM Sans',sans-serif", fontSize: 10, fontWeight: 600, padding: "8px 0", minHeight: 40, cursor: "pointer" }}>🌿 Rest</button>
+        <button onClick={() => onAdd(activeDay, "food")} style={{ flex: 1, background: "#FBF6E8", color: "#C4A24A", border: "1px solid #C4A24A33", borderRadius: 6, fontFamily: "'DM Sans',sans-serif", fontSize: 10, fontWeight: 600, padding: "8px 0", minHeight: 40, cursor: "pointer" }}>🍽 Food</button>
       </div>
     </div>
   );
@@ -1998,14 +2022,14 @@ function Builder({ plan, setPlan, tip, onExport, onStartOver }) {
           <span style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", fontSize: 13, color: T.muted, pointerEvents: "none" }}>🔍</span>
           <input value={search} onChange={e => setSearch(e.target.value)}
             placeholder="Search events, speakers, topics…"
-            style={{ width: "100%", boxSizing: "border-box", background: T.white, border: `1.5px solid ${search ? T.black : T.border}`, borderRadius: 100, fontFamily: "'DM Sans',sans-serif", fontSize: 12, color: T.ink, padding: "7px 36px 7px 32px", outline: "none", transition: "border 0.15s" }} />
+            style={{ width: "100%", boxSizing: "border-box", background: T.white, border: `1.5px solid ${search ? T.black : T.border}`, borderRadius: 100, fontFamily: "'DM Sans',sans-serif", fontSize: 14, color: T.ink, padding: "10px 36px 10px 32px", minHeight: 44, outline: "none", transition: "border 0.15s" }} />
           {search && <button onClick={() => setSearch("")} style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: 14, color: T.muted }}>×</button>}
         </div>
       </div>
 
       {/* Topic category pills - scrollable */}
       <div style={{ padding: "0 12px 6px", flexShrink: 0 }}>
-        <div style={{ display: "flex", gap: 5, overflowX: "auto", paddingBottom: 2 }}>
+        <div style={{ display: "flex", gap: 5, overflowX: "auto", paddingBottom: 4, WebkitOverflowScrolling: "touch", scrollbarWidth: "none", msOverflowStyle: "none" }}>
           {TOPICS.map(tp => {
             const isA = topicFilter === tp.id;
             const cnt = tp.id === "all" ? DB.length : DB.filter(s => getTopics(s).includes(tp.id)).length;
@@ -2016,7 +2040,7 @@ function Builder({ plan, setPlan, tip, onExport, onStartOver }) {
                 border: `1.5px solid ${isA ? tp.color : T.border}`,
                 borderRadius: 100, fontFamily: "'DM Sans',sans-serif",
                 fontSize: 11, fontWeight: isA ? 700 : 500,
-                padding: "5px 11px", cursor: "pointer", whiteSpace: "nowrap",
+                padding: "6px 11px", minHeight: 36, cursor: "pointer", whiteSpace: "nowrap",
                 transition: "all 0.12s", display: "flex", alignItems: "center", gap: 4, flexShrink: 0,
               }}>
                 <span>{tp.e}</span>
@@ -2030,13 +2054,13 @@ function Builder({ plan, setPlan, tip, onExport, onStartOver }) {
 
       {/* Day filter pills - always visible */}
       <div style={{ padding: "0 12px 6px", flexShrink: 0 }}>
-        <div style={{ display: "flex", gap: 5, overflowX: "auto", paddingBottom: 2 }}>
+        <div style={{ display: "flex", gap: 5, overflowX: "auto", paddingBottom: 4, WebkitOverflowScrolling: "touch", scrollbarWidth: "none", msOverflowStyle: "none" }}>
           <button onClick={() => setDayFilter("All")} style={{
             background: dayFilter === "All" ? T.black : T.white,
             color: dayFilter === "All" ? T.cream : T.muted,
             border: `1.5px solid ${dayFilter === "All" ? T.black : T.border}`,
             borderRadius: 100, fontFamily: "'DM Sans',sans-serif", fontSize: 11, fontWeight: 600,
-            padding: "4px 11px", cursor: "pointer", whiteSpace: "nowrap", transition: "all 0.12s", flexShrink: 0,
+            padding: "6px 11px", minHeight: 34, cursor: "pointer", whiteSpace: "nowrap", transition: "all 0.12s", flexShrink: 0,
           }}>All Days</button>
           {DAYS.map(d => (
             <button key={d} onClick={() => setDayFilter(dayFilter === d ? "All" : d)} style={{
@@ -2044,7 +2068,7 @@ function Builder({ plan, setPlan, tip, onExport, onStartOver }) {
               color: dayFilter === d ? T.cream : T.muted,
               border: `1.5px solid ${dayFilter === d ? T.ink : T.border}`,
               borderRadius: 100, fontFamily: "'DM Sans',sans-serif", fontSize: 11, fontWeight: 600,
-              padding: "4px 11px", cursor: "pointer", whiteSpace: "nowrap", transition: "all 0.12s", flexShrink: 0,
+              padding: "6px 11px", minHeight: 34, cursor: "pointer", whiteSpace: "nowrap", transition: "all 0.12s", flexShrink: 0,
             }}>{d.slice(0,3)} <span style={{ opacity: 0.65, fontSize: 10 }}>{DD[d]}</span></button>
           ))}
         </div>
@@ -2063,7 +2087,7 @@ function Builder({ plan, setPlan, tip, onExport, onStartOver }) {
         </button>
         {showFilters && (
           <div style={{ display: "flex", gap: 6, marginTop: 6, flexWrap: "wrap", alignItems: "center" }}>
-            <select value={venueFilter} onChange={e => setVenueFilter(e.target.value)} style={{ background: T.white, border: `1px solid ${T.border}`, borderRadius: 6, fontFamily: "'DM Sans',sans-serif", fontSize: 11, padding: "4px 7px", color: T.ink, cursor: "pointer", maxWidth: 200 }}>
+            <select value={venueFilter} onChange={e => setVenueFilter(e.target.value)} style={{ background: T.white, border: `1px solid ${T.border}`, borderRadius: 6, fontFamily: "'DM Sans',sans-serif", fontSize: 13, padding: "8px 7px", minHeight: 44, color: T.ink, cursor: "pointer", maxWidth: "100%", width: "100%" }}>
               <option value="All">All Venues</option>
               {venues.slice(1).map(v => <option key={v} value={v}>{v}</option>)}
             </select>
@@ -2085,7 +2109,7 @@ function Builder({ plan, setPlan, tip, onExport, onStartOver }) {
       <div style={{ flex: 1, overflowY: "auto", padding: "0 12px 20px" }}>
         {exploreResults.length === 0 ? (
           <div style={{ textAlign: "center", padding: "40px 0" }}>
-            <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 16, fontStyle: "italic", color: T.muted, marginBottom: 8 }}>no events found</div>
+            <div style={{ fontFamily: "'Instrument Serif',serif", fontSize: 16, fontStyle: "italic", color: T.muted, marginBottom: 8 }}>no events found</div>
             <button onClick={clearFilters} style={{ background: T.black, color: T.cream, border: "none", borderRadius: 100, fontFamily: "'DM Sans',sans-serif", fontSize: 12, fontWeight: 600, padding: "8px 20px", cursor: "pointer" }}>Clear filters</button>
           </div>
         ) : (
@@ -2118,39 +2142,41 @@ function Builder({ plan, setPlan, tip, onExport, onStartOver }) {
         ::-webkit-scrollbar{width:4px;height:4px} ::-webkit-scrollbar-track{background:transparent} ::-webkit-scrollbar-thumb{background:#D0CEC8;border-radius:4px}
         @keyframes sxIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
         .ev-in{animation:sxIn 0.2s both}
+        @media(max-width:600px){::-webkit-scrollbar{display:none}}
       `}</style>
 
       {/* ── TOP HEADER ── */}
-      <div style={{ background: T.cream, borderBottom: `2px solid ${T.black}`, padding: "10px 16px", flexShrink: 0 }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
-          <div>
+      <div style={{ background: T.cream, borderBottom: `2px solid ${T.black}`, padding: isMobile ? "8px 10px" : "10px 16px", flexShrink: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: isMobile ? 6 : 10, flexWrap: "wrap" }}>
+          <div style={{ minWidth: 0, flex: "1 1 auto" }}>
             <div style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: T.sageDark }}>SXSW 2026 · Austin TX</div>
-            <div style={{ fontFamily: "'Playfair Display',serif", fontSize: isMobile ? 15 : 18, fontWeight: 900, fontStyle: "italic", color: T.black, lineHeight: 1.1 }}>
+            <div style={{ fontFamily: "'Instrument Serif',serif", fontSize: isMobile ? 14 : 18, fontWeight: 900, fontStyle: "italic", color: T.black, lineHeight: 1.1 }}>
               {totalS > 0 ? `${totalS} session${totalS !== 1 ? "s" : ""} saved` : "Build your schedule"}
             </div>
           </div>
-          <div style={{ display: "flex", gap: 6, alignItems: "center", flexShrink: 0 }}>
+          <div style={{ display: "flex", gap: isMobile ? 4 : 6, alignItems: "center", flexShrink: 0, flexWrap: "wrap" }}>
             {tip && !isMobile && <div style={{ fontSize: 11, color: T.pinkDark, fontStyle: "italic", maxWidth: 180 }}>✦ {tip}</div>}
             <a href="https://pienelope.com/" target="_blank" rel="noopener noreferrer" style={{
               display: "flex", flexDirection: "column", alignItems: "center",
               background: T.pink, color: T.black, border: `1.5px solid ${T.pinkDark}`,
               borderRadius: 10, fontFamily: "'DM Sans',sans-serif",
-              padding: "5px 11px", textDecoration: "none", cursor: "pointer",
+              padding: isMobile ? "6px 8px" : "5px 11px", textDecoration: "none", cursor: "pointer",
               boxShadow: "2px 2px 0 rgba(0,0,0,0.08)", transition: "transform 0.12s, box-shadow 0.12s",
-              whiteSpace: "nowrap", flexShrink: 0,
+              whiteSpace: "nowrap", flexShrink: 0, minHeight: 44,
+              justifyContent: "center",
             }}
               onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-1px)"; e.currentTarget.style.boxShadow = "3px 4px 0 rgba(0,0,0,0.12)"; }}
               onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "2px 2px 0 rgba(0,0,0,0.08)"; }}
             >
               <div style={{ fontSize: isMobile ? 10 : 11, fontWeight: 800, letterSpacing: "0.01em" }}>💬 Text Pienelope</div>
-              <div style={{ fontSize: 9, color: T.pinkDark, fontWeight: 500, lineHeight: 1.2, textAlign: "center" }}>on-the-go event & food recs</div>
+              {!isMobile && <div style={{ fontSize: 9, color: T.pinkDark, fontWeight: 500, lineHeight: 1.2, textAlign: "center" }}>on-the-go event & food recs</div>}
             </a>
-            <button onClick={onExport} style={{ background: T.black, color: T.cream, border: "none", borderRadius: 100, fontFamily: "'DM Sans',sans-serif", fontSize: 11, fontWeight: 700, padding: "7px 14px", cursor: "pointer", whiteSpace: "nowrap" }}>📸 Export</button>
-            <button onClick={onStartOver} style={{ background: "transparent", color: T.muted, border: `1.5px solid ${T.border}`, borderRadius: 100, fontFamily: "'DM Sans',sans-serif", fontSize: 11, fontWeight: 600, padding: "7px 14px", cursor: "pointer", whiteSpace: "nowrap" }}>↺ Start Over</button>
+            <button onClick={onExport} style={{ background: T.black, color: T.cream, border: "none", borderRadius: 100, fontFamily: "'DM Sans',sans-serif", fontSize: isMobile ? 10 : 11, fontWeight: 700, padding: isMobile ? "8px 10px" : "7px 14px", minHeight: 44, cursor: "pointer", whiteSpace: "nowrap" }}>📸 Export</button>
+            <button onClick={onStartOver} style={{ background: "transparent", color: T.muted, border: `1.5px solid ${T.border}`, borderRadius: 100, fontFamily: "'DM Sans',sans-serif", fontSize: isMobile ? 10 : 11, fontWeight: 600, padding: isMobile ? "8px 10px" : "7px 14px", minHeight: 44, cursor: "pointer", whiteSpace: "nowrap" }}>↺ Start Over</button>
           </div>
         </div>
         {/* Quick day stats */}
-        <div style={{ display: "flex", gap: 5, marginTop: 7, overflowX: "auto" }}>
+        <div style={{ display: "flex", gap: 5, marginTop: 7, overflowX: "auto", WebkitOverflowScrolling: "touch", scrollbarWidth: "none", msOverflowStyle: "none" }}>
           {DAYS.map(d => {
             const cnt = (plan[d] || []).length;
             return (
@@ -2159,8 +2185,8 @@ function Builder({ plan, setPlan, tip, onExport, onStartOver }) {
                 color: activeDay === d ? T.cream : cnt > 0 ? T.ink : T.muted,
                 border: `1px solid ${activeDay === d ? T.black : cnt > 0 ? T.border : T.border}`,
                 borderRadius: 6, fontFamily: "'DM Sans',sans-serif", fontSize: 10, fontWeight: 600,
-                padding: "3px 8px", cursor: "pointer", whiteSpace: "nowrap", transition: "all 0.1s",
-                display: "flex", alignItems: "center", gap: 4,
+                padding: isMobile ? "6px 8px" : "3px 8px", cursor: "pointer", whiteSpace: "nowrap", transition: "all 0.1s",
+                display: "flex", alignItems: "center", gap: 4, flexShrink: 0,
               }}>
                 <span>{d.slice(0,3)}</span>
                 {cnt > 0 && <span style={{ background: activeDay === d ? "rgba(255,255,255,0.25)" : "#E0DDD6", borderRadius: 100, fontSize: 9, padding: "0 4px" }}>{cnt}</span>}
@@ -2180,14 +2206,14 @@ function Builder({ plan, setPlan, tip, onExport, onStartOver }) {
           {/* Left: Schedule panel */}
           <div style={{ width: 280, minWidth: 240, borderRight: `2px solid ${T.black}`, background: T.cream, display: "flex", flexDirection: "column", overflow: "hidden", flexShrink: 0 }}>
             <div style={{ padding: "8px 12px 4px", borderBottom: `1px solid ${T.border}`, flexShrink: 0 }}>
-              <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 13, fontWeight: 900, fontStyle: "italic", color: T.ink }}>My Schedule</div>
+              <div style={{ fontFamily: "'Instrument Serif',serif", fontSize: 13, fontWeight: 900, fontStyle: "italic", color: T.ink }}>My Schedule</div>
             </div>
             {schedulePanel}
           </div>
           {/* Right: Explore panel */}
           <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", background: "#F4F2EC" }}>
             <div style={{ padding: "8px 12px 4px", borderBottom: `1px solid ${T.border}`, flexShrink: 0, background: T.cream }}>
-              <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 13, fontWeight: 900, fontStyle: "italic", color: T.ink }}>Explore All Events</div>
+              <div style={{ fontFamily: "'Instrument Serif',serif", fontSize: 13, fontWeight: 900, fontStyle: "italic", color: T.ink }}>Explore All Events</div>
             </div>
             {explorePanel}
           </div>
@@ -2202,7 +2228,7 @@ function Builder({ plan, setPlan, tip, onExport, onStartOver }) {
                 flex: 1, background: mobileTab === k ? T.black : "transparent",
                 color: mobileTab === k ? T.cream : T.muted, border: "none",
                 fontFamily: "'DM Sans',sans-serif", fontSize: 13, fontWeight: 700,
-                padding: "10px 0", cursor: "pointer", transition: "all 0.12s",
+                padding: "12px 0", minHeight: 48, cursor: "pointer", transition: "all 0.12s",
                 display: "flex", flexDirection: "column", alignItems: "center", gap: 1,
               }}>
                 <span>{l}</span>
@@ -2256,13 +2282,13 @@ function ExportView({ plan, onBack }) {
   function downloadAll() { daysWithData.forEach(d => { if (dayCanvases[d]) setTimeout(() => downloadDay(d), 200); }); }
 
   return (
-    <div style={{ minHeight: "100vh", background: T.bg, backgroundImage: `radial-gradient(circle,#00000012 1px,transparent 1px)`, backgroundSize: "22px 22px", fontFamily: "'DM Sans',sans-serif", padding: 20 }}>
-      <div style={{ maxWidth: 500, margin: "0 auto" }}>
-        <button onClick={onBack} style={{ background: "transparent", border: "none", color: T.ink, fontSize: 13, cursor: "pointer", marginBottom: 14, fontFamily: "'DM Sans',sans-serif" }}>← Back to schedule</button>
+    <div style={{ minHeight: "100vh", background: T.bg, backgroundImage: `radial-gradient(circle,#00000012 1px,transparent 1px)`, backgroundSize: "22px 22px", fontFamily: "'DM Sans',sans-serif", padding: "clamp(12px, 3vw, 20px)", overflowX: "hidden" }}>
+      <div style={{ maxWidth: 500, margin: "0 auto", width: "100%" }}>
+        <button onClick={onBack} style={{ background: "transparent", border: "none", color: T.ink, fontSize: 13, cursor: "pointer", marginBottom: 14, fontFamily: "'DM Sans',sans-serif", minHeight: 44, padding: "8px 12px" }}>← Back to schedule</button>
 
         {/* Header card */}
         <div style={{ background: T.cream, border: `2px solid ${T.black}`, borderRadius: 16, padding: "20px 22px", marginBottom: 16, boxShadow: "4px 4px 0 rgba(0,0,0,0.08)" }}>
-          <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: 22, fontWeight: 900, fontStyle: "italic", color: T.black, margin: "0 0 6px" }}>Save as Instagram Stories</h2>
+          <h2 style={{ fontFamily: "'Instrument Serif',serif", fontSize: 22, fontWeight: 900, fontStyle: "italic", color: T.black, margin: "0 0 6px" }}>Save as Instagram Stories</h2>
           <p style={{ fontSize: 13, color: T.muted, lineHeight: 1.5, margin: "0 0 16px" }}>
             Each day is its own <strong style={{ color: T.ink }}>9×16 story image</strong> — perfect for your IG story or phone wallpaper.
           </p>
@@ -2272,18 +2298,18 @@ function ExportView({ plan, onBack }) {
             <>
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
                 {daysWithData.map(d => (
-                  <button key={d} onClick={() => setActivePreview(d)} style={{ background: activePreview === d ? T.black : T.white, color: activePreview === d ? T.cream : T.muted, border: `1.5px solid ${activePreview === d ? T.black : T.border}`, borderRadius: 100, fontFamily: "'DM Sans',sans-serif", fontSize: 12, fontWeight: 600, padding: "6px 14px", cursor: "pointer" }}>
+                  <button key={d} onClick={() => setActivePreview(d)} style={{ background: activePreview === d ? T.black : T.white, color: activePreview === d ? T.cream : T.muted, border: `1.5px solid ${activePreview === d ? T.black : T.border}`, borderRadius: 100, fontFamily: "'DM Sans',sans-serif", fontSize: 12, fontWeight: 600, padding: "8px 14px", minHeight: 44, cursor: "pointer" }}>
                     {d.slice(0, 3)} {DD[d]}
                   </button>
                 ))}
               </div>
               {activePreview && (
-                <button onClick={() => downloadDay(activePreview)} style={{ width: "100%", background: T.black, color: T.cream, border: "none", borderRadius: 100, fontFamily: "'DM Sans',sans-serif", fontSize: 14, fontWeight: 600, padding: "12px 0", cursor: "pointer", marginBottom: 8, boxShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>
+                <button onClick={() => downloadDay(activePreview)} style={{ width: "100%", background: T.black, color: T.cream, border: "none", borderRadius: 100, fontFamily: "'DM Sans',sans-serif", fontSize: 14, fontWeight: 600, padding: "14px 0", minHeight: 48, cursor: "pointer", marginBottom: 8, boxShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>
                   ⬇ Download {activePreview} Story
                 </button>
               )}
               {daysWithData.length > 1 && (
-                <button onClick={downloadAll} style={{ width: "100%", background: T.sage, color: T.black, border: "none", borderRadius: 100, fontFamily: "'DM Sans',sans-serif", fontSize: 13, fontWeight: 600, padding: "10px 0", cursor: "pointer" }}>
+                <button onClick={downloadAll} style={{ width: "100%", background: T.sage, color: T.black, border: "none", borderRadius: 100, fontFamily: "'DM Sans',sans-serif", fontSize: 13, fontWeight: 600, padding: "12px 0", minHeight: 44, cursor: "pointer" }}>
                   ⬇ Download All {daysWithData.length} Stories
                 </button>
               )}
@@ -2304,7 +2330,7 @@ function ExportView({ plan, onBack }) {
 
         {rendering && (
           <div style={{ background: T.cream, border: `1.5px solid ${T.border}`, borderRadius: 16, padding: "60px 20px", textAlign: "center" }}>
-            <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 18, fontStyle: "italic", color: T.muted }}>rendering stories…</div>
+            <div style={{ fontFamily: "'Instrument Serif',serif", fontSize: 18, fontStyle: "italic", color: T.muted }}>rendering stories…</div>
           </div>
         )}
 
@@ -2312,7 +2338,7 @@ function ExportView({ plan, onBack }) {
         {!rendering && daysWithData.length > 1 && (
           <div style={{ marginTop: 14 }}>
             <div style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: T.muted, marginBottom: 8 }}>All Days</div>
-            <div style={{ display: "flex", gap: 8, overflowX: "auto" }}>
+            <div style={{ display: "flex", gap: 8, overflowX: "auto", WebkitOverflowScrolling: "touch", scrollbarWidth: "none", msOverflowStyle: "none", paddingBottom: 4 }}>
               {daysWithData.map(d => dayCanvases[d] && (
                 <div key={d} onClick={() => setActivePreview(d)} style={{ flexShrink: 0, cursor: "pointer", border: `2px solid ${activePreview === d ? T.black : T.border}`, borderRadius: 10, overflow: "hidden", width: 80, boxShadow: activePreview === d ? "0 4px 12px rgba(0,0,0,0.15)" : "none", transition: "all 0.15s" }}>
                   <img src={dayCanvases[d].toDataURL("image/png")} alt={d} style={{ width: "100%", display: "block" }} />
@@ -2357,6 +2383,7 @@ export default function App() {
 
   return (
     <>
+      <style>{`html,body{overflow-x:hidden;-webkit-text-size-adjust:100%} *{-webkit-tap-highlight-color:transparent;box-sizing:border-box}`}</style>
       {page === "landing" && <Landing onStart={() => setPage("onboarding")} />}
       {page === "onboarding" && <Onboarding onComplete={handleOnboardDone} />}
       {page === "loading" && <Loading prefs={prefs} onDone={handleGenDone} />}
